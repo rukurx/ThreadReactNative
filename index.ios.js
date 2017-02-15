@@ -5,49 +5,77 @@
  */
 
 import React, { Component } from 'react';
-import {
-  AppRegistry,
-  StyleSheet,
-  Text,
-  View
-} from 'react-native';
+import { AppRegistry, StyleSheet, Text, View } from 'react-native';
 
-export default class ThreadReactNative extends Component {
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit index.ios.js
-        </Text>
-        <Text style={styles.instructions}>
-          Press Cmd+R to reload,{'\n'}
-          Cmd+D or shake for dev menu
-        </Text>
-      </View>
+import { createStore, applyMiddleware } from 'redux';
+import { Provider } from 'react-redux';
+import createLogger from 'redux-logger';
+import createSagaMiddleware from 'redux-saga';
+import rootSaga from './src/sagas';
+import reducer from './src/reducers';
+
+// import App from './components/App';
+import App from './src/components/App';
+
+const initialState = {
+    thread: {
+        id: 1,
+        title: 'これはThreadのタイトル1です',
+        body: 'これはThreadの本文1です',
+        isEdit: false,
+        titleLength: 17,
+        bodyLength: 15
+    },
+    comments: [
+        {
+            id: 1,
+            title: 'これはCommentのタイトル1です',
+            body: 'これはCommentの本文1です',
+            isEdit: false,
+        },
+        {
+            id: 2,
+            title: 'これはCommentのタイトル2です',
+            body: 'これはCommentの本文2です',
+            isEdit: false,
+        }
+    ],
+    likes: [
+        {
+            id: 1,
+            user_name: '太郎',
+        },
+        {
+            id: 2,
+            user_name: '花子',
+        }
+    ],
+    loading: {
+        isActive: false
+    }
+};
+
+const sagaMiddleware = createSagaMiddleware();
+const logger = createLogger();
+const store = createStore(
+    reducer,
+    initialState,
+    applyMiddleware(
+        sagaMiddleware,
+        logger
+    )
+);
+sagaMiddleware.run(rootSaga);
+
+// let store = createStore(reducers)
+let ThreadReactNative = React.createClass({
+  render: function() {
+    return(
+      <Provider store={store}>
+        <App />
+      </Provider>
     );
   }
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
 });
 
 AppRegistry.registerComponent('ThreadReactNative', () => ThreadReactNative);
